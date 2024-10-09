@@ -78,3 +78,4 @@ NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_R1.fastq.gz
 NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_R2.fastq.gz
 refgenome
 runConfig.yaml
+#
