@@ -1,0 +1,107 @@
+
+* CB-gbs CassetteBuilder for cassetteGBS
+
+** Description
+
+This script is a tool to prepare and organize input data for the cassetteGBS
+genomic analysis pipeline. A "cassette" is the complete set of files required
+for our GBS data processing. It automates the creation of multiple self-contained
+"cassettes".
+
+This script streamlines the data preparation process, ensuring consistent
+organization and reducing manual setup errors. It's particularly useful for
+handling multiple sequencing runs or large-scale genomic studies. Symlinks are
+used to reduce data redundancy and improve data provenance tracking.
+
+Each cassette includes:
+- Barcode files for sample demultiplexing
+- Raw sequencing read files (as symlinks)
+- Reference genome for alignment
+- A key file, which will used by cassetteGBS pipeline for triggering and naming
+  parallel pipelines
+
+- For each runName, it creates a "cassette" in the output directory, which includes:
+  - A copy of the corresponding barcode file
+  - Symlinks to the read files (R1 and R2)
+  - A copy of the reference genome directory
+  - An empty key file
+
+
+** Requirements
+
+Directory structure with specific subdirectories:
+
+- =input=
+  - =barcodeLinks=
+  - =readLinks=
+  - =refgenome=
+
+*** Setup
+   #+BEGIN_SRC shell
+   mkdir -p input/{barcodeLinks,readLinks,refgenome}
+   #+END_SRC
+
+** Workflow
+
+*** Add Files
+
+Add the following files to their respective subdirectories:
+   - readLinks: <runName>_R1.fastq.gz, <runName>_R2.fastq.gz
+   - barcodeLinks: <runName>_barcodes.txt
+   - refgenome: reference genome files
+
+   Note: Files in refgenome, barcodeLinks, and readLinks must be symlinks. There
+   may be many runs loaded, however, they must be matched by the <runName>
+   character string as found on the R1 files. You can use the full and original
+   filenames as provided by your sequencing service. This substantially improves
+   data tracking and reduces human error.
+
+**** Symlinking
+
+When adding files to the input subdirectories, use symlinks instead of copying the original files. This approach has several benefits:
+
+1. Saves disk space by avoiding duplication of large sequencing files.
+2. Maintains a clear link to the original data, improving data provenance.
+3. Links are transparently updated if the file content changes (not name).
+   - this allows easy manipulation of refgenomes across ALL cassettes.
+4. Fully specifying the symlink path from root ensures the links can be moved.
+
+Eg. link all reads that match
+#+begin_src bash
+  # navigate to input/readLinks
+  # Assuming your original files are in /path/to/reads, (use tab completion)
+
+  ln -s /path/to/reads/NS*_R{1,2}.fastq.gz . # note trailing '.'
+
+  # repeat for all read sets
+  # similarly repeat for all necessary barcode files
+#+end_src
+
+*** Running the Script
+3. Execute the script:
+   #+BEGIN_SRC bash
+   ./cassetteBuilder.sh
+   #+END_SRC
+
+*** Output
+- It clears and recreates the output directory.
+- It lists the contents of the input subdirectories for user reference.
+- It creates a manifest of run names based on the R1 fastq files in the
+  readLinks directory.
+- The run will create an 'output' directory containing cassettes for each runName:
+  - output/cassette_<runName>/
+    - <runName>_barcodes.txt
+    - <runName>_R1.fastq.gz
+    - <runName>_R2.fastq.gz
+    - refgenome/ (directory)
+    - key_<runName>
+
+Output Structure
+#+BEGIN_EXAMPLE
+output/cassette_NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01/
+  ├── key_NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01
+  ├── NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_barcodes.txt
+  ├── NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_R1.fastq.gz
+  ├── NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_R2.fastq.gz
+  └── refgenome/
+#+END_EXAMPLE

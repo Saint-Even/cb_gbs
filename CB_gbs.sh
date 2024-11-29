@@ -9,9 +9,9 @@ echo "Begin: cassetteBuilder for cassetteGBS"
 : <<'BLOCK'
 BLOCK
 
-echo "Names must be formatted:"
-echo -e "<runName>_barcodes.txt, \n<runName>_R1.fastq.gz, \n<runName>_R2.fastq.gz"
-echo "Files in refgenome, barcodeLinks and readLinks must be symlinks"
+# echo "Names must be formatted:"
+# echo -e "<runName>_barcodes.txt, \n<runName>_R1.fastq.gz, \n<runName>_R2.fastq.gz"
+# echo "Files in refgenome, barcodeLinks and readLinks must be symlinks"
 
 #clear output dir
 rm -r output/
@@ -41,8 +41,6 @@ echo "========================"
 
 cd ..
 
-
-
 #make runName manifest from R1 files
 declare -a manf
 for f in $(ls -1 input/readLinks/*_R1.fastq.gz); do
@@ -70,12 +68,3 @@ BLOCK
 
 # end of script
 exit 0
-
-#example contents of a cassette_runName
-key_NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01
-NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_barcodes.txt
-NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_R1.fastq.gz
-NS.1726.002.B717---B503.GBS_AAFC-Brandon_2021_P01_R2.fastq.gz
-refgenome
-runConfig.yaml
-#
